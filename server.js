@@ -29,11 +29,14 @@ app.use(passport.session());
 
 myDB(async (client) => {
   const myDataBase = await client.db("my_chat").collection("users");
+  let currentUsers = 0;
 
   routes(app, myDataBase);
   auths(app, myDataBase);
 
   io.on("connection", (socket) => {
+    ++currentUsers;
+    io.emit('user count', currentUsers);
     console.log("A user has connected");
   });
 }).catch((e) => {
