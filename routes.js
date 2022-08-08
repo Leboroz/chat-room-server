@@ -1,6 +1,14 @@
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 
+const ensureAuthenticated = (req, res, next) => {
+  if(req.isAuthenticated()) {
+    return next();
+  }
+  
+  res.redirect('/');
+}
+
 module.exports = function (app, myDataBase) {
   app.route('/').get((req, res) => {
     res.render(__dirname + '/views/pug', {
@@ -46,18 +54,17 @@ module.exports = function (app, myDataBase) {
       }
   );
   
+  app.route('/chat').get(ensureAuthenticated, (req, res) => {
+    res.render(__dirname + '/views/pug/chat.pug', { user: req.user })
+  })
+
   app.route('/auth/github').get(passport.authenticate('github'));
   app.route('/auth/github/callback').get(passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
-    res.redirect('/profile');
+    req.session.user_id = req.user.id;
+    res.redirect('/chat');
   });
 
-  app.route('/profile').get((req, res, next) => {
-    if(req.isAuthenticated()) {
-      return next();
-    }
-    
-    res.redirect('/');
-  }, (req, res) => {
+  app.route('/profile').get(ensureAuthenticated, (req, res) => {
     res.render(__dirname + '/views/pug/profile', { username: req.user.username });
   });
 
