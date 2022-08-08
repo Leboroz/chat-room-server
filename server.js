@@ -3,7 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const myDB = require('./connection');
 const session = require('express-session');
+const passport = require('passport');
 const routes = require('./routes');
+const auths = require('./auth');
 
 const app = express();
 
@@ -25,7 +27,7 @@ myDB(async (client) => {
   const myDataBase = await client.db('my_chat').collection('users');
 
   routes(app, myDataBase);
-
+  auths(app, myDataBase);
 
 }).catch((e) => {
   app.route('/').get((req, res) => {

@@ -3,7 +3,13 @@ const bcrypt = require('bcrypt');
 
 module.exports = function (app, myDataBase) {
   app.route('/').get((req, res) => {
-    res.render(__dirname + '/views/pug', { title: 'Hello', message: 'Please login', showLogin: true, showRegistration: true });
+    res.render(__dirname + '/views/pug', {
+      title: 'Hello',
+      message: 'Please login',
+      showLogin: true,
+      showRegistration: true,
+      showSocialAuth: true,
+    });
   });
 
   app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
@@ -39,6 +45,11 @@ module.exports = function (app, myDataBase) {
         res.redirect('/profile');
       }
   );
+  
+  app.route('/auth/github').get(passport.authenticate('github'));
+  app.route('/auth/github/callback').get(passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
+    res.redirect('/profile');
+  });
 
   app.route('/profile').get((req, res, next) => {
     if(req.isAuthenticated()) {
