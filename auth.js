@@ -1,10 +1,10 @@
-const passport = require("passport");
-const bcrypt = require("bcrypt");
-const ObjectID = require("mongodb").ObjectID;
-const LocalStrategy = require("passport-local");
-const GitHubStrategy = require("passport-github").Strategy;
+import passport from "passport";
+import bcrypt from "bcrypt";
+import { ObjectID } from "mongodb";
+import LocalStrategy from "passport-local";
+import { Strategy as GitHubStrategy } from "passport-github";
 
-module.exports = function (app, myDataBase) {
+export default function (app, myDataBase) {
   passport.serializeUser((user, done) => {
     done(null, user._id);
   });

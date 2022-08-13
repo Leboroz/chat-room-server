@@ -6,6 +6,7 @@
   "author": "http://github.com/JosephLivengood",
   "version": "0.0.1",
   "description": "What am I about?",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

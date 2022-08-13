@@ -1,23 +1,25 @@
 "use strict";
-require("dotenv").config();
-const express = require("express");
-const myDB = require("./connection");
-const session = require("express-session");
-const passport = require("passport");
-const routes = require("./routes");
-const auths = require("./auth");
-const passportSocketIo = require("passport.socketio");
-const MongoStore = require("connect-mongo");
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
+import myDB from "./connection.js";
+import session from "express-session";
+import passport from "passport";
+import routes from "./routes.js";
+import auths from "./auth.js";
+import passportSocketIo from "passport.socketio";
+import MongoStore from "connect-mongo";
+import { createServer } from "http";
+import coockieParser from "cookie-parser";
+import { Server } from "socket.io";
+
 const URI = process.env.MONGO_URI;
 const store = MongoStore.create({ mongoUrl: URI });
-const coockieParser = require("cookie-parser");
 
 const app = express();
-const http = require("http").createServer(app);
-const io = require("socket.io")(http);
+const http = createServer(app);
+const io = new Server(http);
 
-app.set("view engine", "pug");
-app.use("/public", express.static(process.cwd() + "/public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -74,14 +76,20 @@ myDB(async (client) => {
     });
 
     socket.on("chat message", (message) => {
-      io.emit("chat message", { name: socket.request.user.name || socket.request.user.username, message });
+      io.emit("chat message", {
+        name: socket.request.user.name || socket.request.user.username,
+        message,
+      });
     });
 
     socket.on("disconnect", () => {
       --currentUsers;
     });
 
-    console.log("user " + socket.request.user.name || socket.request.user.username + " connected");
+    console.log(
+      "user " + socket.request.user.name ||
+        socket.request.user.username + " connected"
+    );
   });
 }).catch((e) => {
   app.route("/").get((req, res) => {
@@ -89,7 +97,7 @@ myDB(async (client) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 http.listen(PORT, () => {
   console.log("Listening on port " + PORT);

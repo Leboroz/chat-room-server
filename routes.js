@@ -1,5 +1,5 @@
-const passport = require("passport");
-const bcrypt = require("bcrypt");
+import passport from "passport";
+import bcrypt from "bcrypt";
 
 const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -9,7 +9,7 @@ const ensureAuthenticated = (req, res, next) => {
   res.redirect("/");
 };
 
-module.exports = function (app, myDataBase) {
+export default function (app, myDataBase) {
   app.route("/").get((req, res) => {
     res.render(__dirname + "/views/pug", {
       title: "Hello",
@@ -95,4 +95,4 @@ module.exports = function (app, myDataBase) {
   app.use((req, res, next) => {
     res.status(404).type("text").send("Not Found");
   });
-};
+}
