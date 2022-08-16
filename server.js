@@ -6,12 +6,14 @@ import myDB from "./connection.js";
 import session from "express-session";
 import passport from "passport";
 import routes from "./routes.js";
-import auths from "./auth.js";
+import auths from "./controller/Auth.js";
 import passportSocketIo from "passport.socketio";
 import MongoStore from "connect-mongo";
 import { createServer } from "http";
 import coockieParser from "cookie-parser";
 import { Server } from "socket.io";
+import cors from "cors";
+import bodyParser from "body-parser";
 
 const URI = process.env.MONGO_URI;
 const store = MongoStore.create({ mongoUrl: URI });
@@ -20,8 +22,8 @@ const app = express();
 const http = createServer(app);
 const io = new Server(http);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -32,6 +34,7 @@ app.use(
     key: "express.sid",
   })
 );
+app.use(cors());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -48,12 +51,13 @@ const onAuthorizeFail = (data, message, error, accept) => {
   accept(null, false);
 };
 
-myDB(async (client) => {
-  const myDataBase = await client.db("my_chat").collection("users");
+myDB(async () => {
   let currentUsers = 0;
 
-  routes(app, myDataBase);
-  auths(app, myDataBase);
+      console.log('db connected')
+
+  routes(app);
+  auths(app);
 
   io.use(
     passportSocketIo.authorize({
@@ -91,14 +95,11 @@ myDB(async (client) => {
         socket.request.user.username + " connected"
     );
   });
-}).catch((e) => {
-  app.route("/").get((req, res) => {
-    res.render("pug", { title: e, message: "Unable to login" });
-  });
-});
+})
 
 const PORT = process.env.PORT || 5000;
 
 http.listen(PORT, () => {
   console.log("Listening on port " + PORT);
 });
+

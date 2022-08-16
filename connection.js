@@ -1,20 +1,22 @@
 // Do not change this file
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 dotenv.config();
 
-export default async function main(callback) {
+export default async function(callback) {
   const URI = process.env.MONGO_URI; // Declare MONGO_URI in your .env file
-  const client = new MongoClient(URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+
 
   try {
     // Connect to the MongoDB cluster
-    await client.connect();
+    mongoose.connect(URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }).then(() => {
+      callback();
+    });
 
     // Make the appropriate DB calls
-    await callback(client);
   } catch (e) {
     // Catch any errors
     console.error(e);

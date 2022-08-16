@@ -1,5 +1,6 @@
 import passport from "passport";
 import bcrypt from "bcrypt";
+import User from "./model/User.js";
 
 const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
@@ -9,15 +10,9 @@ const ensureAuthenticated = (req, res, next) => {
   res.redirect("/");
 };
 
-export default function (app, myDataBase) {
+export default function (app) {
   app.route("/").get((req, res) => {
-    res.render(__dirname + "/views/pug", {
-      title: "Hello",
-      message: "Please login",
-      showLogin: true,
-      showRegistration: true,
-      showSocialAuth: true,
-    });
+    res.send("hello");
   });
 
   app
@@ -33,13 +28,13 @@ export default function (app, myDataBase) {
   app.route("/register").post(
     (req, res, next) => {
       const hash = bcrypt.hashSync(req.body.password, 12);
-      myDataBase.findOne({ username: req.body.username }, (err, user) => {
+      User.findOne({ username: req.body.username }, (err, user) => {
         if (err) {
           next(res);
         } else if (user) {
           res.redirect("/");
         } else {
-          myDataBase.insertOne(
+          User.insertOne(
             {
               username: req.body.username,
               password: hash,
